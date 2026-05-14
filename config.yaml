@@ -1,5 +1,6 @@
 ---
 observations: kmer_counts_rle.bed
+mode: nb
 
 observation_rate:
   output_file: obs_rate.bed

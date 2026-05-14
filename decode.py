@@ -5,7 +5,7 @@ import numpy as np
 
 
 
-def decode(obs_file, obs_rates_file, param_file, decode_method, out_path_file, out_tracts_file):
+def decode(obs_file, obs_rates_file, mode, param_file, decode_method, out_path_file, out_tracts_file):
     
     print('Loading data...')
     hmm_parameters = read_HMM_parameters_from_file(param_file)
@@ -46,7 +46,7 @@ def decode(obs_file, obs_rates_file, param_file, decode_method, out_path_file, o
         contig_obs = obs[sl]
         contig_obs_rates = obs_rates[sl]
 
-        emissions_probs = emission_probabilities(contig_obs, contig_obs_rates, hmm_parameters.emissions, hmm_parameters.dispersions)
+        emissions_probs = emission_probabilities(contig_obs, contig_obs_rates, hmm_parameters.emissions, hmm_parameters.dispersions, mode)
         posterior_probs = calculate_posterior_probabilities(emissions_probs, hmm_parameters)
 
         if decode_method == 'Viterbi':
@@ -90,12 +90,13 @@ def print_script_usage():
     Hidden Markov Model for archaic human introgression inference using the ARCkmerFinder output.
 
     Usage:
-    python decode.py -obs [obs_file] -obs_rates [obs_rates_file] -param [hmm_parameters_file]
-    python decode.py -obs [obs_file] -obs_rates [obs_rates_file] -param [hmm_parameters_file] -viterbi -out_path [out_path_file] -out_tracts [out_tracts_file] 
+    python decode.py -obs [obs_file] -obs_rates [obs_rates_file] -mode [nb|poisson] -param [hmm_parameters_file]
+    python decode.py -obs [obs_file] -obs_rates [obs_rates_file] -mode [nb|poisson] -param [hmm_parameters_file] -viterbi -out_path [out_path_file] -out_tracts [out_tracts_file] 
         
     > HMM decoding                
         -obs                Input file with observation data (required)
         -obs_rates          Input file with observation rates estimates (required)
+        -mode               Model type (default: nb (negative binomial), or poisson)
         -param              HMM parameters file (required)
         -out_path           Output file with decoded path (default: 'path.txt')
         -out_tracts         Output file with decoded tracts (default: 'tracts.txt')
@@ -109,6 +110,7 @@ def main():
     
     parser.add_argument("-obs",help="Input file with observation data (required)", type=str)
     parser.add_argument("-obs_rates", metavar='',help="Input file with observation rates estimates (required)", type=str)
+    parser.add_argument("-mode", metavar='',help="Model type (default: nb (negative binomial), or poisson)", default='nb', type=str)
     parser.add_argument("-param", metavar='',help="HMM parameters file (required)", type=str)
     parser.add_argument("-viterbi", action='store_true', help="Decode using Viterbi algorithm (default: False)")
     parser.add_argument("-out_path", metavar='',help="Output file with decoded path (default: 'path.txt')", default = 'path.txt')
@@ -116,13 +118,14 @@ def main():
 
     args = parser.parse_args()
     
-    if args.obs is None or args.obs_rates is None or args.param is None:
+    if (args.obs is None) or (args.obs_rates is None) or (args.param is None) or (args.mode not in ['nb', 'poisson']):
         print(print_script_usage())
         return
     
     print('-' * 40)
     print(f'> Observations file: {args.obs}')
     print(f'> Observation rates file: {args.obs_rates}')
+    print(f'> Model type: {args.mode}')
     print(f'> HMM parameters file: {args.param}')
     if args.viterbi:
         decode_method = 'Viterbi'
@@ -134,7 +137,7 @@ def main():
     print(f'> Output file with decoded tracts: {args.out_tracts}')
     print('-' * 40)
 
-    decode(args.obs, args.obs_rates, args.param, decode_method, args.out_path, args.out_tracts)
+    decode(args.obs, args.obs_rates, args.mode, args.param, decode_method, args.out_path, args.out_tracts)
     
     return
         

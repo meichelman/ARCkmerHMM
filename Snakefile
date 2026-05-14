@@ -11,6 +11,7 @@ configfile: "config.yaml"
 obs_file = config["observations"]
 obs_rate_out = config["observation_rate"]["output_file"]
 obs_rate_bin_size = config["observation_rate"]["bin_size"]
+mode = config["mode"]
 # train_start_params = config["train"]["start_params"]
 train_out = config["train"]["output_file"]
 use_viterbi = config["decode"]["use_viterbi"]
@@ -29,7 +30,8 @@ rule decode:
     input:
         obs_file,
         obs_rate_out,
-        train_out
+        train_out,
+        mode
     output:
         decode_out_path,
         decode_out_tracts
@@ -38,9 +40,9 @@ rule decode:
     localrule: True
     run:
         if params.use_viterbi:
-            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -param {input[2]} -viterbi {params.use_viterbi} -out_path viterbi_{output[0]} -out_tracts viterbi_{output[1]}"
+            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -mode {input[3]} -param {input[2]} -viterbi {params.use_viterbi} -out_path viterbi_{output[0]} -out_tracts viterbi_{output[1]}"
         else:
-            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -param {input[2]} -out_path PMAP_{output[0]} -out_tracts PMAP_{output[1]}"
+            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -mode {input[3]} -param {input[2]} -out_path PMAP_{output[0]} -out_tracts PMAP_{output[1]}"
         shell(szCommand)
 
 

@@ -81,7 +81,6 @@ def neg_binom_probability(k, mu, r):
     '''Calculate the probability of observing k given a negative binomial distribution with expectation mu and dispersion r'''
     if mu <= 0:
         return 1.0 if k == 0 else 0.0
-    # Need to change this if and when we change how the mutation rate is calculated
 
     p = r / (r + mu)
 
@@ -94,19 +93,22 @@ def neg_binom_probability(k, mu, r):
 
 
 @njit
-def emission_probabilities(observations, obs_rates, emissions, dispersions):
+def emission_probabilities(observations, obs_rates, emissions, dispersions, mode):
     '''Calculate the emission probabilities for each observation and state'''
     num_obs = len(observations)
     num_states = len(emissions)
     probabilities = np.zeros((num_obs, num_states))
+    epsilon = 1e-10
 
     for state in range(num_states):
         for t in range(num_obs):
             k = observations[t]
-            mu = emissions[state] * obs_rates[t]
-            r = dispersions[state]
-            # probabilities[t, state] = poisson_probability(observations[t], mu)
-            probabilities[t, state] = neg_binom_probability(k, mu, r)
+            mu = emissions[state] * max(obs_rates[t], epsilon) # Handle the case of obs_rates[t] = 0
+            if mode == 'poisson':
+                probabilities[t, state] = poisson_probability(k, mu)
+            elif mode == 'nb':
+                r = dispersions[state]
+                probabilities[t, state] = neg_binom_probability(k, mu, r)
 
     return probabilities
 
@@ -154,9 +156,9 @@ def backward(emissions_probs, transitions, scales):
     return beta
 
 
-def get_log_likelihood(hmm_parameters, observations, obs_rates):
+def get_log_likelihood(hmm_parameters, observations, obs_rates, mode):
     '''Calculate the log-likelihood of the data given the HMM parameters'''
-    emissions_probs = emission_probabilities(observations, obs_rates, hmm_parameters.emissions, hmm_parameters.dispersions)
+    emissions_probs = emission_probabilities(observations, obs_rates, hmm_parameters.emissions, hmm_parameters.dispersions, mode)
     # print(emissions_probs[:20])
     _, scales = forward(emissions_probs, hmm_parameters.transitions, hmm_parameters.starting_probabilities)
     # print(scales[:20])
@@ -264,11 +266,11 @@ def maximize_emissions_dispersions(posterior_probs, observations, obs_rates, cur
     return new_emissions, new_dispersions
 
 
-def train_baum_welsch(hmm_parameters, observations, obs_rates):
+def train_baum_welsch(hmm_parameters, observations, obs_rates, mode):
 
     num_states = len(hmm_parameters.starting_probabilities)
 
-    emissions_probs = emission_probabilities(observations, obs_rates, hmm_parameters.emissions, hmm_parameters.dispersions)
+    emissions_probs = emission_probabilities(observations, obs_rates, hmm_parameters.emissions, hmm_parameters.dispersions, mode)
     forward_probs, scales = forward(emissions_probs, hmm_parameters.transitions, hmm_parameters.starting_probabilities)
     backward_probs = backward(emissions_probs, hmm_parameters.transitions, scales)
 
@@ -278,7 +280,15 @@ def train_baum_welsch(hmm_parameters, observations, obs_rates):
     new_starting_probabilities = np.sum(posterior_probs, axis=0) / scale
 
     # Update emissions and dispersions
-    new_emissions, new_dispersions = maximize_emissions_dispersions(posterior_probs, observations, obs_rates, hmm_parameters.emissions, hmm_parameters.dispersions)
+    if mode == 'nb':
+        new_emissions, new_dispersions = maximize_emissions_dispersions(posterior_probs, observations, obs_rates, hmm_parameters.emissions, hmm_parameters.dispersions)
+    elif mode == 'poisson':
+        new_emissions = np.zeros((num_states))
+        for state in range(num_states):
+            top = np.sum(posterior_probs[:,state] * observations)
+            bottom = np.sum(posterior_probs[:,state] * obs_rates)
+            new_emissions[state] = top / bottom
+        # new_dispersions = hmm_parameters.dispersions # Not used in Poisson model
 
     # Prevent emissions collapsing to the same value
     epsilon = 1e-3
@@ -309,17 +319,17 @@ def train_baum_welsch(hmm_parameters, observations, obs_rates):
     return HMMParam(hmm_parameters.state_names, new_starting_probabilities, new_transitions_matrix, new_emissions, new_dispersions)
 
 
-def train_model(observations, obs_rates, hmm_parameters, epsilon = 1e-3, maxiterations = 1000):
+def train_model(observations, obs_rates, hmm_parameters, mode, epsilon = 1e-3, maxiterations = 1000):
 
     # Get probability of data with initial parameters
-    previous_loglikelihood = get_log_likelihood(hmm_parameters, observations, obs_rates)
+    previous_loglikelihood = get_log_likelihood(hmm_parameters, observations, obs_rates, mode)
     logoutput(hmm_parameters, previous_loglikelihood, 0)
 
     # Train parameters using Baum-Welch algorithm
     for iter in range(1, maxiterations):
     # for iter in range(1, 2):
-        hmm_parameters = train_baum_welsch(hmm_parameters, observations, obs_rates) # Maximization
-        new_loglikelihood = get_log_likelihood(hmm_parameters, observations, obs_rates) # Expectation
+        hmm_parameters = train_baum_welsch(hmm_parameters, observations, obs_rates, mode) # Maximization
+        new_loglikelihood = get_log_likelihood(hmm_parameters, observations, obs_rates, mode) # Expectation
 
         logoutput(hmm_parameters, new_loglikelihood, iter)
 
