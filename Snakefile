@@ -23,26 +23,35 @@ rule all:
     input:
         decode_out_path,
         decode_out_tracts
+    params:
+        use_viterbi=use_viterbi
     localrule: True
+    run:
+        if params.use_viterbi:
+            shell('mv path.txt viterbi_path.txt')
+            shell('mv tracts.txt viterbi_tracts.txt')
+        else:
+            shell('mv path.txt PMAP_path.txt')
+            shell('mv tracts.txt PMAP_tracts.txt')
 
 
 rule decode:
     input:
         obs_file,
         obs_rate_out,
-        train_out,
-        mode
+        train_out
     output:
         decode_out_path,
         decode_out_tracts
     params:
-        use_viterbi=use_viterbi
+        use_viterbi=use_viterbi,
+        mode=mode
     localrule: True
     run:
         if params.use_viterbi:
-            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -mode {input[3]} -param {input[2]} -viterbi {params.use_viterbi} -out_path viterbi_{output[0]} -out_tracts viterbi_{output[1]}"
+            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -mode {params.mode} -param {input[2]} -viterbi {params.use_viterbi} -out_path {output[0]} -out_tracts {output[1]}"
         else:
-            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -mode {input[3]} -param {input[2]} -out_path PMAP_{output[0]} -out_tracts PMAP_{output[1]}"
+            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -mode {params.mode} -param {input[2]} -out_path {output[0]} -out_tracts {output[1]}"
         shell(szCommand)
 
 
@@ -52,9 +61,11 @@ rule train:
         obs_rate_out
     output:
         train_out
+    params:
+        mode=mode
     localrule: True
     run:
-        szCommand = f"python train.py -obs {input[0]} -obs_rates {input[1]} -out {output}"
+        szCommand = f"python train.py -obs {input[0]} -obs_rates {input[1]} -mode {params.mode} -out {output}"
         shell(szCommand)
 
 
