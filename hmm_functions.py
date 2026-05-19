@@ -288,7 +288,7 @@ def train_baum_welsch(hmm_parameters, observations, obs_rates, mode):
             top = np.sum(posterior_probs[:,state] * observations)
             bottom = np.sum(posterior_probs[:,state] * obs_rates)
             new_emissions[state] = top / bottom
-        # new_dispersions = hmm_parameters.dispersions # Not used in Poisson model
+            new_dispersions = hmm_parameters.dispersions # Not used in Poisson model
 
     # Prevent emissions collapsing to the same value
     epsilon = 1e-3
