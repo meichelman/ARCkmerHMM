@@ -49,7 +49,7 @@ rule decode:
     localrule: True
     run:
         if params.use_viterbi:
-            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -mode {params.mode} -param {input[2]} -viterbi {params.use_viterbi} -out_path {output[0]} -out_tracts {output[1]}"
+            szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -mode {params.mode} -param {input[2]} -viterbi -out_path {output[0]} -out_tracts {output[1]}"
         else:
             szCommand = f"python decode.py -obs {input[0]} -obs_rates {input[1]} -mode {params.mode} -param {input[2]} -out_path {output[0]} -out_tracts {output[1]}"
         shell(szCommand)
