@@ -47,10 +47,10 @@ def read_HMM_parameters_from_file(filename):
 
 def get_default_HMM_parameters():
     return HMMParam(state_names = ['Human', 'Archaic'],
-                    starting_probabilities = [0.95, 0.05],
+                    starting_probabilities = [0.99, 0.01],
                     transitions = [[0.99,0.01],[0.05,0.95]],
-                    emissions = [0.3, 4.2],
-                    dispersions = [0.002, 0.144])
+                    emissions = [0.01, 0.25],
+                    dispersions = [0.0004, 0.0592])
 
 
 def write_HMM_to_file(hmmparam, outfile):
