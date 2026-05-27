@@ -117,6 +117,7 @@ def get_observation_file_length(obs_file):
 def get_archaic_introgression_tracts(out_tracts_file):
     tracts = []
     with open(out_tracts_file) as f:
+        f.readline() # skip header
         for line in f:
             fields = line.strip().split('\t')
             length, state = int(fields[3]), fields[4]
