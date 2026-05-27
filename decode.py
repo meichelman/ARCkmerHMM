@@ -1,6 +1,6 @@
 import argparse
 from hmm_functions import read_HMM_parameters_from_file, emission_probabilities, calculate_posterior_probabilities, pmap_path, viterbi_path, write_posterior_probs, write_tracts
-from helper_functions import load_obs_and_obs_rates
+from helper_functions import load_obs_and_obs_rates, decoding_statistics
 import numpy as np
 
 
@@ -79,6 +79,21 @@ def decode(obs_file, obs_rates_file, mode, param_file, decode_method, out_path_f
         window_size,
         contig_lengths
     )
+    
+    summary_stats = decoding_statistics(obs_file, out_tracts_file)
+    
+    print('-' * 40)
+    print(f'> Input file length: {summary_stats[0]} bp')
+    print(f'> Sum of archaic introgression calls: {summary_stats[1]} bp')
+    print(f'> Archaic ancestry proportion: {summary_stats[2]:.4f}')
+    print(f'> Number of tracts: {summary_stats[3]}')
+    print(f'> Average tract length: {summary_stats[4]:.2f} bp')
+    print(f'> Median tract length: {summary_stats[5]} bp')
+    print(f'> Standard deviation of tract length: {summary_stats[6]:.2f} bp')
+    print(f'> Mode tract length: {summary_stats[7]} bp')
+    print(f'> Max tract length: {summary_stats[8]} bp')
+    print(f'> Min tract length: {summary_stats[9]} bp')
+    print('-' * 40)
 
     print('Done')
     

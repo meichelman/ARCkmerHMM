@@ -101,3 +101,44 @@ def load_obs_and_obs_rates(obs_file, obs_rates_file):
     #                 break
 
     return obs_arr, obs_rates_arr, contig_offsets, window_size, contig_lengths
+
+
+def get_observation_file_length(obs_file):
+    assembly_length = 0
+    with open(obs_file) as f:
+        prev_contig = f.readline().split('\t')[0]
+        for line in f:
+            if line.split('\t')[0] != prev_contig:
+                prev_contig = line.split('\t')[0]
+                assembly_length += int(line.split('\t')[2])
+    return assembly_length
+
+
+def get_archaic_introgression_tracts(out_tracts_file):
+    tracts = []
+    with open(out_tracts_file) as f:
+        for line in f:
+            fields = line.strip().split('\t')
+            length, state = int(fields[3]), fields[4]
+            if state == 'Archaic':
+                tracts.append(length)
+    return tracts
+                
+
+
+def decoding_statistics(obs_file, out_tracts_file):
+    assembly_length = get_observation_file_length(obs_file)
+    tracts = get_archaic_introgression_tracts(out_tracts_file)
+    archaic_introgression_length = sum(tracts)
+    proportion_introgressed = archaic_introgression_length / assembly_length
+    num_tracts = len(tracts)
+    avg_tract_length = archaic_introgression_length / num_tracts
+    median_tract_length = np.median(tracts)
+    std_tract_length = np.std(tracts)
+    mode_tract_length = max(set(tracts), key=tracts.count)
+    max_tract_length = max(tracts)
+    min_tract_length = min(tracts)
+    return (assembly_length, archaic_introgression_length, proportion_introgressed,
+            num_tracts, avg_tract_length, median_tract_length,
+            std_tract_length, mode_tract_length, max_tract_length,
+            min_tract_length)
