@@ -113,6 +113,7 @@ def get_observation_file_length(obs_file):
                 prev_contig = cur_contig
                 assembly_length += prev_end
             prev_end = int(line.split('\t')[2])
+    assembly_length += prev_end
     return assembly_length
 
 
