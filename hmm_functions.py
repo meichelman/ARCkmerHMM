@@ -1,7 +1,7 @@
 import json
 import numpy as np
 from numba import njit
-from math import lgamma, log
+from math import lgamma
 from scipy.optimize import minimize
 from scipy.special import gammaln
 
@@ -74,7 +74,8 @@ def poisson_probability(n, mu):
     #     p *= mu
     #     p /= i+1
     # return p
-    return n * log(mu) - mu - lgamma(n + 1)
+    log_prob = n * np.log(mu) - mu - lgamma(n + 1)
+    return np.exp(log_prob)
 
 
 @njit
