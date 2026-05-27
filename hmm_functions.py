@@ -1,7 +1,7 @@
 import json
 import numpy as np
 from numba import njit
-from math import lgamma
+from math import lgamma, log
 from scipy.optimize import minimize
 from scipy.special import gammaln
 
@@ -69,11 +69,12 @@ def poisson_probability(n, mu):
     '''Calculate the probability of observing n given a Poisson distribution with expectation lam, while avoiding underflow issues'''
     # naive:   np.exp(-lam) * lam**n / factorial(n)
     # iterative, to keep the components from getting too large or small:
-    p = np.exp(mu)
-    for i in range(n):
-        p *= mu
-        p /= i+1
-    return p
+    # p = np.exp(mu)
+    # for i in range(n):
+    #     p *= mu
+    #     p /= i+1
+    # return p
+    return n * log(mu) - mu - lgamma(n + 1)
 
 
 @njit
