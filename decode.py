@@ -85,7 +85,7 @@ def decode(obs_file, obs_rates_file, mode, param_file, decode_method, out_path_f
     print('-' * 40)
     print(f'> Input file length: {summary_stats[0]} bp')
     print(f'> Sum of archaic introgression calls: {summary_stats[1]} bp')
-    print(f'> Archaic ancestry proportion: {summary_stats[2] * 100:.1f}%')
+    print(f'> Archaic ancestry proportion: {summary_stats[2] * 100:.2f}%')
     print(f'> Number of tracts: {summary_stats[3]}')
     print(f'> Average tract length: {summary_stats[4]} bp')
     print(f'> Median tract length: {int(summary_stats[5])} bp')
