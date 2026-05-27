@@ -108,9 +108,11 @@ def get_observation_file_length(obs_file):
     with open(obs_file) as f:
         prev_contig = f.readline().split('\t')[0]
         for line in f:
-            if line.split('\t')[0] != prev_contig:
-                prev_contig = line.split('\t')[0]
-                assembly_length += int(line.split('\t')[2])
+            cur_contig = line.split('\t')[0]
+            if cur_contig != prev_contig:
+                prev_contig = cur_contig
+                assembly_length += prev_end
+            prev_end = int(line.split('\t')[2])
     return assembly_length
 
 
