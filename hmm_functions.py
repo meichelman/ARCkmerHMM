@@ -109,6 +109,9 @@ def emission_probabilities(observations, obs_rates, emissions, dispersions, mode
             elif mode == 'nb':
                 r = dispersions[state]
                 probabilities[t, state] = neg_binom_probability(k, mu, r)
+                
+    if mode == 'poisson':
+        probabilities = np.clip(probabilities, 1e-300, None) # Avoid zero probabilities which cause issues in log space
 
     return probabilities
 
