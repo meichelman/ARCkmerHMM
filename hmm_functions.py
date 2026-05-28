@@ -324,7 +324,7 @@ def train_baum_welsch(hmm_parameters, observations, obs_rates, mode):
     return HMMParam(hmm_parameters.state_names, new_starting_probabilities, new_transitions_matrix, new_emissions, new_dispersions)
 
 
-def train_model(observations, obs_rates, hmm_parameters, mode, epsilon = 1e-3, maxiterations = 1000):
+def train_model(observations, obs_rates, hmm_parameters, mode, epsilon = 1e-3, maxiterations = 10000):
 
     # Get probability of data with initial parameters
     previous_loglikelihood = get_log_likelihood(hmm_parameters, observations, obs_rates, mode)

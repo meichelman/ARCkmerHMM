@@ -134,14 +134,14 @@ def decoding_statistics(obs_file, out_tracts_file):
     assembly_length = get_observation_file_length(obs_file)
     tracts = get_archaic_introgression_tracts(out_tracts_file)
     archaic_introgression_length = sum(tracts)
-    proportion_introgressed = archaic_introgression_length / assembly_length
+    proportion_introgressed = archaic_introgression_length / assembly_length if assembly_length > 0 else 0
     num_tracts = len(tracts)
-    avg_tract_length = archaic_introgression_length / num_tracts
-    median_tract_length = np.median(tracts)
-    std_tract_length = np.std(tracts)
-    mode_tract_length = max(set(tracts), key=tracts.count)
-    max_tract_length = max(tracts)
-    min_tract_length = min(tracts)
+    avg_tract_length = archaic_introgression_length / num_tracts if num_tracts > 0 else 0
+    median_tract_length = np.median(tracts) if num_tracts > 0 else 0
+    std_tract_length = np.std(tracts) if num_tracts > 0 else 0
+    mode_tract_length = max(set(tracts), key=tracts.count) if num_tracts > 0 else 0
+    max_tract_length = max(tracts) if num_tracts > 0 else 0
+    min_tract_length = min(tracts) if num_tracts > 0 else 0
     return (assembly_length, archaic_introgression_length, proportion_introgressed,
             num_tracts, avg_tract_length, median_tract_length,
             std_tract_length, mode_tract_length, max_tract_length,
