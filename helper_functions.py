@@ -7,6 +7,7 @@ import math
 def load_obs_and_obs_rates(obs_file, obs_rates_file):
     
     # First pass: identify window_size from first non-zero count line
+    window_size = 1000  # default window size if all counts are zero
     with open(obs_file) as infile:
         for line in infile:
             fields = line.split('\t')
