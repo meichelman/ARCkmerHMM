@@ -17,8 +17,11 @@ def train(obs_file, obs_rates_file, mode, param_file, out_file):
     print(f'> Number of k-mers: {obs.astype(np.int64).sum()}')
     print('-' * 40)
 
-    print('Training HMM...')
-    hmm_parameters = train_model(obs, obs_rates, hmm_parameters, mode)
+    if obs.astype(np.int64).sum() == 0:
+        print('All observations are zero. Skipping training.')
+    elif obs.astype(np.int64).sum() > 0:
+        print('Training HMM...')
+        hmm_parameters = train_model(obs, obs_rates, hmm_parameters, mode)
     print('Writing output...')
     write_HMM_to_file(hmm_parameters, out_file)
     print('Done')
