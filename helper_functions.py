@@ -107,7 +107,8 @@ def load_obs_and_obs_rates(obs_file, obs_rates_file):
 def get_observation_file_length(obs_file):
     assembly_length = 0
     with open(obs_file) as f:
-        prev_contig = f.readline().split('\t')[0]
+        first_line = f.readline()
+        prev_contig, prev_end = first_line.split('\t')[0], int(first_line.split('\t')[2])
         for line in f:
             cur_contig = line.split('\t')[0]
             if cur_contig != prev_contig:
