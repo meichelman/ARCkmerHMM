@@ -164,11 +164,7 @@ def backward(emissions_probs, transitions, scales):
 def get_log_likelihood(hmm_parameters, observations, obs_rates, mode):
     '''Calculate the log-likelihood of the data given the HMM parameters'''
     emissions_probs = emission_probabilities(observations, obs_rates, hmm_parameters.emissions, hmm_parameters.dispersions, mode)
-    # print(emissions_probs[:20])
     _, scales = forward(emissions_probs, hmm_parameters.transitions, hmm_parameters.starting_probabilities)
-    # print(scales[:20])
-    # print(np.where(scales == 0))  output [2193]
-    # print(observations[2193], obs_rates[2193], emissions_probs[2193,:], scales[2193]) # output 0 0 [1. 1.] 0.0
     return np.sum(np.log(scales))
 
 

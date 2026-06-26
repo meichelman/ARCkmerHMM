@@ -7,10 +7,10 @@ observation_rate:
   bin_size: 1000000
 
 train:
-  # start_params: params.json
+  start_params: None
   output_file: trained.json
 
 decode:
-  use_viterbi: False
+  use_viterbi: True
   output_path_file: path.txt
   output_tracts_file: tracts.txt
